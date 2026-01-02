@@ -14,6 +14,15 @@ public class People {
     public People() {
     }
 
+    @Override
+    public String toString() {
+        return "People{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                ", sex='" + sex + '\'' +
+                '}';
+    }
+
     public String getName() {
         return name;
     }
