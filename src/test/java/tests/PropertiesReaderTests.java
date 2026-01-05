@@ -5,6 +5,7 @@ import models.Settings;
 import org.aeonbits.owner.ConfigFactory;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import utils.AppConfig;
 import utils.JsonHelper;
@@ -12,6 +13,7 @@ import utils.JsonHelper;
 import java.io.FileInputStream;
 import java.util.Properties;
 
+@Tag("UNIT")
 public class PropertiesReaderTests {
 
     @Test

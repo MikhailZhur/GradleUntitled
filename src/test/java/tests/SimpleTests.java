@@ -4,10 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import models.Cat;
 import models.People;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -15,7 +12,7 @@ import utils.JsonHelper;
 
 import java.io.File;
 import java.io.IOException;
-
+@Tag("API")
 public class SimpleTests {
     
     @Test
@@ -28,7 +25,7 @@ public class SimpleTests {
     }
 
     @ParameterizedTest
-    @CsvSource({"stas, 18, male", "anton, 20, male", "sasha, 90, male"})
+    @CsvSource({"stas, 18, male", "antons, 20, male", "sasha, 90, male"})
     public void testTwoLessThanFour(String name, String age, String sex){
         System.out.println(name + " " + age + " " + sex);
         Assertions.assertTrue(name.contains("s"));
@@ -66,6 +63,19 @@ public class SimpleTests {
         System.out.println(people);
 
         System.out.println(JsonHelper.toJson(cat));
+    }
+
+    @Test
+    public void catTest(){
+        Cat cat = Cat.builder()
+                .name("Nolan")
+                .model("British")
+                .age(34)
+                .build();
+        System.out.println(cat);
+        int realCatAge = cat.getAge()+10;
+        System.out.println(cat);
+        System.out.println(realCatAge);
     }
 
 }
