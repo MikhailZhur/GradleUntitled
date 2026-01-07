@@ -2,9 +2,11 @@ package tests;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import listener.RetryListener;
 import models.Cat;
 import models.People;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -12,16 +14,32 @@ import utils.JsonHelper;
 
 import java.io.File;
 import java.io.IOException;
+
 @Tag("API")
+@ExtendWith(RetryListener.class)
 public class SimpleTests {
-    
+
+    @AfterAll
+    public static void saveFailed(){
+        RetryListener.saveFailedTests();
+    }
+
+    private static int age = 0;
+
+    @Test
+    public void fasi(){
+        int b = 6;
+        age++;
+        Assertions.assertEquals(2,age);
+    }
+
     @Test
     @DisplayName("Результат сравнения")
     public void testTwoLessThanThree(){
 
-        int a = 2;
-        int b = 3;
-        Assertions.assertTrue(b>a, "Число а " + a + " больше, чем число " + b);
+        int a = 4;
+        int b = 6;
+        Assertions.assertTrue(b>a, "Число а " + b + " больше, чем число " + a);
     }
 
     @ParameterizedTest
