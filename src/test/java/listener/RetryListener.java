@@ -24,7 +24,7 @@ public class RetryListener implements TestExecutionExceptionHandler, AfterTestEx
                 extensionContext.getRequiredTestMethod().invoke(extensionContext.getRequiredTestInstance());
                 return;
             } catch (Throwable ex) {
-                throwable = ex;
+                throwable = ex.getCause();
             }
         }
         throw throwable;
