@@ -1,6 +1,10 @@
 package tests.junit5.api;
 
 import io.restassured.response.Response;
+import models.fakeapiuser.Address;
+import models.fakeapiuser.Geolocation;
+import models.fakeapiuser.Name;
+import models.fakeapiuser.UserRoot;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -64,4 +68,65 @@ public class SimpleApiTest {
         Assertions.assertNotEquals(sortedResponseIds, notSortedResponseIds);
         Assertions.assertEquals(sortedByCode, sortedResponseIds);
     }
+
+    @Test
+    public void addNewUserTest(){
+        Name name = new Name("Thomas","Anderson");
+        Geolocation geolocation = new Geolocation("2132","23545");
+        Address address = Address.builder()
+                .geolocation(geolocation)
+                .city("Moskow")
+                .number(4)
+                .zipCode("2332-4574").build();
+
+        UserRoot bodyRequest = UserRoot.builder()
+                .name(name)
+                .phone("223432")
+                .email("gldsgjl@mail")
+                .username("ghomas")
+                .password("123qwe")
+                .address(address).build();
+
+        given()
+                .body(bodyRequest)
+                .post("https://fakestoreapi.com/users")
+                .then().log().all()
+                .statusCode(201)
+                .body("id", notNullValue());
+
+    }
+
+    private UserRoot getTestUser(){
+        Name name = new Name("Thomas","Anderson");
+        Geolocation geolocation = new Geolocation("2132","23545");
+        Address address = Address.builder()
+                .geolocation(geolocation)
+                .city("Moskow")
+                .number(4)
+                .zipCode("2332-4574").build();
+
+        return UserRoot.builder()
+                .name(name)
+                .phone("223432")
+                .email("gldsgjl@mail")
+                .username("ghomas")
+                .password("123qwe")
+                .address(address).build();
+    }
+
+    @Test
+    public void updateUserTest(){
+        UserRoot user = getTestUser();
+        String odlPassword = user.getPassword();
+
+        user.setPassword(("newPass"));
+        given().body(user)
+                .put("https://fakestoreapi.com/users/" + user.getId())
+                .then().log().all()
+                .body("password", not(equalTo(odlPassword)));
+
+        System.out.println(odlPassword);
+        System.out.println(user.getPassword());
+    }
+
 }
