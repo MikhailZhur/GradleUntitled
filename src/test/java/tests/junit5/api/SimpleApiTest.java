@@ -1,5 +1,6 @@
 package tests.junit5.api;
 
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import models.fakeapiuser.Address;
 import models.fakeapiuser.Geolocation;
@@ -9,7 +10,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.restassured.RestAssured.given;
@@ -127,6 +130,29 @@ public class SimpleApiTest {
 
         System.out.println(odlPassword);
         System.out.println(user.getPassword());
+    }
+
+    @Test
+    public void deleteUserTest(){
+        given()
+                .delete("https://fakestoreapi.com/users/7")
+                .then().log().all()
+                .statusCode(200);
+    }
+
+    @Test
+    public void authUserTest(){
+        Map<String ,String> userAuth = new HashMap<>();
+        userAuth.put("username", "jimmie_k");
+        userAuth.put("password", "klein*#%*");
+
+        given().log().all()
+                .contentType(ContentType.JSON)
+                .body(userAuth)
+                .post("https://fakestoreapi.com/auth/login")
+                .then().log().all()
+                .statusCode(201)
+                .body("token", notNullValue());
     }
 
 }
