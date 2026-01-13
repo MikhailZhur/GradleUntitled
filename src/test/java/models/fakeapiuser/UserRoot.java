@@ -12,27 +12,28 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserRoot {
 
+    @JsonProperty("address")
+    private Address address;
+
+    @JsonProperty("id")
+    private Integer id;
+
+    @JsonProperty("email")
+    private String email;
+
+
+    @JsonProperty("username")
+    private String username;
+
     @JsonProperty("password")
     private String password;
 
-    @JsonProperty("address")
-    private Address address;
+    @JsonProperty("name")
+    private Name name;
 
     @JsonProperty("phone")
     private String phone;
 
     @JsonProperty("__v")
     private int v;
-
-    @JsonProperty("name")
-    private Name name;
-
-    @JsonProperty("id")
-    private int id;
-
-    @JsonProperty("email")
-    private String email;
-
-    @JsonProperty("username")
-    private String username;
 }

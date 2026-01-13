@@ -23,7 +23,7 @@ public class Address {
     @JsonProperty("zipcode")
     private String zipCode;
 
-    @JsonProperty("Geolocation")
+    @JsonProperty("geolocation")
     private Geolocation geolocation;
 
 }
