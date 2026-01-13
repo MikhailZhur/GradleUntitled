@@ -1,5 +1,6 @@
 package tests.junit5.api;
 
+import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.filter.log.RequestLoggingFilter;
@@ -9,8 +10,12 @@ import models.fakeapiuser.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import static io.restassured.RestAssured.given;
@@ -19,7 +24,7 @@ public class SimpleApiRefactoredTests {
     @BeforeAll
     public static void setUp() {
         RestAssured.baseURI = "https://fakestoreapi.com";
-        RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+        RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter(), new AllureRestAssured());
     }
 
     @Test
@@ -50,6 +55,7 @@ public class SimpleApiRefactoredTests {
         Assertions.assertTrue(response.getAddress().getZipCode().matches("\\d{5}-\\d{4}"));
     }
 
+
     @Test
     public void getAllUsersWithLimitTest() {
         int limitSize = 3;
@@ -62,6 +68,34 @@ public class SimpleApiRefactoredTests {
 
         Assertions.assertEquals(3, users.size());
     }
+
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 1, 10})
+    public void getAllUsersWithLimitParametrizedTest(int limitSize) {
+        List<UserRoot> users = given().queryParam("limit", limitSize)
+                .get("/users")
+                .then()
+                .statusCode(200)
+                .extract().as(new TypeRef<List<UserRoot>>() {
+                });
+
+        Assertions.assertEquals(limitSize, users.size());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 0, 40})
+    public void getAllUsersWithLimitWithErrorParamsTest(int limitSize) {
+        List<UserRoot> users = given().queryParam("limit", limitSize)
+                .get("/users")
+                .then()
+                .statusCode(200)
+                .extract().as(new TypeRef<List<UserRoot>>() {
+                });
+
+        Assertions.assertNotEquals(limitSize, users.size());
+    }
+
 
     @Test
     public void getAllUsersSortByDescTest() {
@@ -133,7 +167,7 @@ public class SimpleApiRefactoredTests {
 
         UserRoot updatedUser = given()
                 .body(user)
-                .pathParam("userId", user.getId() )
+                .pathParam("userId", user.getId())
                 .put("/users/{userId}")
                 .then().extract().as(UserRoot.class);
 
@@ -141,8 +175,8 @@ public class SimpleApiRefactoredTests {
     }
 
     @Test
-    public void authUserTest(){
-        AuthData authData = new AuthData("jimmie_k","klein*#%*");
+    public void authUserTest() {
+        AuthData authData = new AuthData("jimmie_k", "klein*#%*");
 
         String token = given()
                 .contentType(ContentType.JSON)
