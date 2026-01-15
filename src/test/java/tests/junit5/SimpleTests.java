@@ -15,7 +15,6 @@ import utils.JsonHelper;
 import java.io.File;
 import java.io.IOException;
 
-@Tag("API")
 @ExtendWith(RetryListener.class)
 public class SimpleTests {
 
