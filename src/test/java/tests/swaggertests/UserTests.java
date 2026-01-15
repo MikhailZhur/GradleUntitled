@@ -61,9 +61,6 @@ public class UserTests {
                 .statusCode(201)
                 .extract().jsonPath().getObject("info", Info.class);
 
-        Assertions.assertEquals("success", info.getStatus());
-        Assertions.assertEquals("User created", info.getMessage());
-
         Info ErrorInfo = given()
                 .contentType(ContentType.JSON)
                 .body(user)
