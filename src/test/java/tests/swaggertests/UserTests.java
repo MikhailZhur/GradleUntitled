@@ -10,7 +10,6 @@ import models.swagger.Info;
 import models.swagger.JwtAuthData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Random;
@@ -96,12 +95,12 @@ public class UserTests {
     }
 
     @Test
-    public void positiveAdminAuthTest(){
-        JwtAuthData authData = new JwtAuthData("admin","admin");
+    public void positiveAdminAuthTest() {
+        JwtAuthData authData = new JwtAuthData("admin", "admin");
 
-         String token = given()
+        String token = given()
                 .contentType(ContentType.JSON)
-                 .body(authData)
+                .body(authData)
                 .post("/api/login")
                 .then()
                 .statusCode(200)
@@ -111,7 +110,7 @@ public class UserTests {
     }
 
     @Test
-    public void positiveNewUserAuthTest(){
+    public void positiveNewUserAuthTest() {
         int randomNumber = Math.abs(random.nextInt(5000));
         FullUser user = FullUser.builder()
                 .login("ThredQaUser" + randomNumber)
@@ -143,7 +142,7 @@ public class UserTests {
     }
 
     @Test
-    public void negativeAuthTest(){
+    public void negativeAuthTest() {
 
         JwtAuthData authData = new JwtAuthData("user22", "ghtr454");
 
@@ -151,6 +150,56 @@ public class UserTests {
                 .contentType(ContentType.JSON)
                 .body(authData)
                 .post("/api/login")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    public void positiveGetUserInfoTest() {
+        JwtAuthData authData = new JwtAuthData("admin", "admin");
+
+        String token = given()
+                .contentType(ContentType.JSON)
+                .body(authData)
+                .post("/api/login")
+                .then()
+                .statusCode(200)
+                .extract().jsonPath().getString("token");
+
+        Assertions.assertNotNull(token);
+
+        given()
+                .auth().oauth2(token)
+                .get("/api/user")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test
+    public void positiveGetUserInfoInvalidJWTTest() {
+        JwtAuthData authData = new JwtAuthData("admin", "admin");
+
+        String token = given()
+                .contentType(ContentType.JSON)
+                .body(authData)
+                .post("/api/login")
+                .then()
+                .statusCode(200)
+                .extract().jsonPath().getString("token");
+
+        Assertions.assertNotNull(token);
+
+        given()
+                .auth().oauth2("hdfhfgh"+token)
+                .get("/api/user")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    public void negativeGetUserInfoWithOutJwtTTest() {
+        given()
+                .get("/api/user")
                 .then()
                 .statusCode(401);
     }
