@@ -59,13 +59,12 @@ public class UserTests {
                 .pass("123qwe")
                 .build();
 
-        Info info = given()
+        given()
                 .contentType(ContentType.JSON)
                 .body(user)
                 .post("/api/signup")
                 .then()
-                .statusCode(201)
-                .extract().jsonPath().getObject("info", Info.class);
+                .statusCode(201);
 
         Info ErrorInfo = given()
                 .contentType(ContentType.JSON)
@@ -360,9 +359,10 @@ public class UserTests {
     public void positiveGetAllUsersTest() {
         List<String> users = given()
                 .get("/api/users")
-                .then().extract().as(new TypeRef<List<String>>() {});
+                .then().extract().as(new TypeRef<>() {
+                });
 
-        Assertions.assertTrue(users.size()>=3);
+        Assertions.assertTrue(users.size() >= 3);
 
     }
 }
