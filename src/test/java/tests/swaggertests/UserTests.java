@@ -1,5 +1,8 @@
 package tests.swaggertests;
 
+import assertions.AssertableResponse;
+import assertions.Conditions;
+import assertions.GenericAssertableResponse;
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
@@ -18,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import static assertions.Conditions.hasMessage;
+import static assertions.Conditions.hasStatusCode;
 import static io.restassured.RestAssured.given;
 
 
@@ -77,6 +82,26 @@ public class UserTests {
         Assertions.assertEquals("Login already exist", ErrorInfo.getMessage());
     }
 
+//    @Test
+//    public void registerUserNoPasswordTest() {
+//        int randomNumber = Math.abs(random.nextInt(5000));
+//        FullUser user = FullUser.builder()
+//                .login("ThredQaUser" + randomNumber)
+//                .build();
+//
+//        Info info = given()
+//                .contentType(ContentType.JSON)
+//                .body(user)
+//                .post("/api/signup")
+//                .then()
+//                .statusCode(400)
+//                .extract().jsonPath().getObject("info", Info.class);
+//
+//        Assertions.assertEquals("fail", info.getStatus());
+//        Assertions.assertEquals("Missing login or password", info.getMessage());
+//
+//    }
+
     @Test
     public void registerUserNoPasswordTest() {
         int randomNumber = Math.abs(random.nextInt(5000));
@@ -91,6 +116,23 @@ public class UserTests {
                 .then()
                 .statusCode(400)
                 .extract().jsonPath().getObject("info", Info.class);
+
+
+        new AssertableResponse(given()
+                .contentType(ContentType.JSON)
+                .body(user)
+                .post("/api/signup")
+                .then())
+                .should(hasMessage("Missing login or password"))
+                .should(hasStatusCode(400));
+
+        new GenericAssertableResponse<Info>(given()
+                .contentType(ContentType.JSON)
+                .body(user)
+                .post("/api/signup")
+                .then(), new TypeRef<Info>() {})
+                .should(hasMessage("Missing login or password"))
+                .should(hasStatusCode(400));
 
         Assertions.assertEquals("fail", info.getStatus());
         Assertions.assertEquals("Missing login or password", info.getMessage());
