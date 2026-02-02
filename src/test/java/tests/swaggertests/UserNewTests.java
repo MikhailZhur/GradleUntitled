@@ -2,26 +2,19 @@ package tests.swaggertests;
 
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
-import io.restassured.common.mapper.TypeRef;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
-import io.restassured.http.ContentType;
 import models.swagger.FullUser;
-import models.swagger.Info;
-import models.swagger.JwtAuthData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import services.UserService;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import static assertions.Conditions.hasMessage;
 import static assertions.Conditions.hasStatusCode;
-import static io.restassured.RestAssured.given;
 
 public class UserNewTests {
     public static Random random;
@@ -129,160 +122,65 @@ public class UserNewTests {
 
     @Test
     public void positiveUpdatePasswordUserTest() {
-        int randomNumber = Math.abs(random.nextInt(5000));
-        FullUser user = FullUser.builder()
-                .login("ThredQaUser" + randomNumber)
-                .pass("123qwe")
-                .build();
+        FullUser user = getRandomUser();
+        String oldPassword = user.getPass();
+        userService.register(user);
 
-        given()
-                .contentType(ContentType.JSON)
-                .body(user)
-                .post("/api/signup")
-                .then()
-                .statusCode(201);
-
-        JwtAuthData authData = new JwtAuthData(user.getLogin(), user.getPass());
-
-        String token = given()
-                .contentType(ContentType.JSON)
-                .body(authData)
-                .post("/api/login")
-                .then()
-                .statusCode(200)
-                .extract().jsonPath().getString("token");
-
+        String token = userService.auth(user).asJwt();
         Assertions.assertNotNull(token);
 
-        Map<String, String> password = new HashMap<>();
         String updatePassValue = "new123Qwe";
-        password.put("password", updatePassValue);
 
-        Info updatePassInfo = given()
-                .contentType(ContentType.JSON)
-                .auth().oauth2(token)
-                .body(password)
-                .put("/api/user")
-                .then()
-                .extract().jsonPath().getObject("info", Info.class);
+        userService.updatePass(updatePassValue, token)
+                .should(hasStatusCode(200))
+                .should(hasMessage("User password successfully changed"));
 
-        Assertions.assertEquals("User password successfully changed", updatePassInfo.getMessage());
+        user.setPass(updatePassValue);
 
-        authData.setPassword(updatePassValue);
+        token = userService.auth(user).should(hasStatusCode(200)).asJwt();
 
-        token = given()
-                .contentType(ContentType.JSON)
-                .body(authData)
-                .post("/api/login")
-                .then()
-                .statusCode(200)
-                .extract().jsonPath().getString("token");
+        FullUser updatedUser = userService.getUserInfo(token).as(FullUser.class);
 
-        FullUser updatedUser = given()
-                .auth().oauth2(token)
-                .get("/api/user")
-                .then()
-                .statusCode(200)
-                .extract().as(FullUser.class);
-
-        Assertions.assertNotEquals(user.getPass(), updatedUser.getPass());
+        Assertions.assertNotEquals(oldPassword, updatedUser.getPass());
     }
 
     @Test
     public void negativeChangeAdminPasswordTest() {
-
-        JwtAuthData authData = new JwtAuthData("admin", "admin");
-
-        String token = given()
-                .contentType(ContentType.JSON)
-                .body(authData)
-                .post("/api/login")
-                .then()
-                .statusCode(200)
-                .extract().jsonPath().getString("token");
+        FullUser user = getAdminUser();
+        String token = userService.auth(user).asJwt();
 
         Assertions.assertNotNull(token);
 
-        Map<String, String> password = new HashMap<>();
         String updatePassValue = "new123Qwe";
-        password.put("password", updatePassValue);
-
-        Info updatePassInfo = given()
-                .contentType(ContentType.JSON)
-                .auth().oauth2(token)
-                .body(password)
-                .put("/api/user")
-                .then()
-                .statusCode(400)
-                .extract().jsonPath().getObject("info", Info.class);
-
-        Assertions.assertEquals("Cant update base users", updatePassInfo.getMessage());
+        userService.updatePass(updatePassValue, token)
+                .should(hasStatusCode(400))
+                .should(hasMessage("Cant update base users"));
     }
 
     @Test
     public void negativeDeleteAdminTest() {
-        JwtAuthData authData = new JwtAuthData("admin", "admin");
+        FullUser user = getAdminUser();
 
-        String token = given()
-                .contentType(ContentType.JSON)
-                .body(authData)
-                .post("/api/login")
-                .then()
-                .statusCode(200)
-                .extract().jsonPath().getString("token");
+        String token = userService.auth(user).asJwt();
 
-        Info deleteAdmin = given()
-                .auth().oauth2(token)
-                .delete("/api/user")
-                .then().statusCode(400)
-                .extract().jsonPath().getObject("info", Info.class);
-
-        Assertions.assertEquals("Cant delete base users", deleteAdmin.getMessage());
-
+        userService.deleteUser(token)
+                .should(hasStatusCode(400))
+                .should(hasMessage("Cant delete base users"));
     }
 
     @Test
-    public void positiveDeleteAdminTest() {
-        int randomNumber = Math.abs(random.nextInt(5000));
-        FullUser user = FullUser.builder()
-                .login("ThredQaUser" + randomNumber)
-                .pass("123qwe")
-                .build();
-
-        given()
-                .contentType(ContentType.JSON)
-                .body(user)
-                .post("/api/signup")
-                .then()
-                .statusCode(201);
-
-        JwtAuthData authData = new JwtAuthData(user.getLogin(), user.getPass());
-
-        String token = given()
-                .contentType(ContentType.JSON)
-                .body(authData)
-                .post("/api/login")
-                .then()
-                .statusCode(200)
-                .extract().jsonPath().getString("token");
-
-        Info infoDelete = given()
-                .auth().oauth2(token)
-                .delete("/api/user")
-                .then().statusCode(200)
-                .extract().jsonPath().getObject("info", Info.class);
-
-        Assertions.assertEquals("User successfully deleted", infoDelete.getMessage());
+    public void positiveDeleteUserTest() {
+        FullUser user = getRandomUser();
+        userService.register(user);
+        String token = userService.auth(user).asJwt();
+        userService.deleteUser(token)
+                .should(hasStatusCode(200))
+                .should(hasMessage("User successfully deleted"));
     }
 
     @Test
     public void positiveGetAllUsersTest() {
-        List<String> users = given()
-                .get("/api/users")
-                .then().extract().as(new TypeRef<>() {
-                });
-
+        List<String> users = userService.getAllUsers().asList(String.class);
         Assertions.assertTrue(users.size() >= 3);
-
     }
 }

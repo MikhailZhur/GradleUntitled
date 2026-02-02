@@ -37,13 +37,13 @@ public class UserService {
         return new AssertableResponse(given().contentType(ContentType.JSON)
                 .auth().oauth2(jwt)
                 .body(password)
-                .put("/user")
+                .put("/api/user")
                 .then());
     }
 
     public AssertableResponse deleteUser(String jwt) {
         return new AssertableResponse(given().auth().oauth2(jwt)
-                .delete("/user")
+                .delete("/api/user")
                 .then());
     }
 
@@ -57,7 +57,7 @@ public class UserService {
 
     public AssertableResponse getAllUsers() {
         return new AssertableResponse(given()
-                .get("/users")
+                .get("/api/users")
                 .then());
     }
 }
