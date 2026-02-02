@@ -4,7 +4,10 @@ import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
+import io.restassured.response.Response;
 import models.swagger.FullUser;
+import models.swagger.Info;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -36,9 +39,18 @@ public class UserNewTests {
     @Test
     public void positiveRegisterWithGamesTest() {
         FullUser user = getRandomUserWithGame();
-        userService.register(user)
-                .should(hasStatusCode(201))
-                .should(hasMessage("User created"));
+        Response response = userService.register(user)
+      //          .should(hasStatusCode(201))
+      //          .should(hasMessage("User created"))
+                .asResponse();
+        Info info = response.jsonPath().getObject("info", Info.class);
+
+        SoftAssertions softAssertions = new SoftAssertions();
+        softAssertions.assertThat(info.getMessage()).as("Сообщение об ошибке было не верное")
+                .isEqualTo("фейк месс");
+        softAssertions.assertThat(response.statusCode()).as("Статус код был не 200")
+                .isEqualTo(201);
+        softAssertions.assertAll();
     }
 
 

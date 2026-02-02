@@ -26,6 +26,7 @@ dependencies {
     testImplementation 'io.rest-assured:rest-assured:5.5.0'
     testImplementation 'io.qameta.allure:allure-rest-assured:2.12.1'
     testImplementation 'com.github.javafaker:javafaker:1.0.2'
+    testImplementation 'org.assertj:assertj-core:3.27.6'
 //    testImplementation 'org.seleniumhq.selenium:selenium-java:4.38.0'
 }
 
