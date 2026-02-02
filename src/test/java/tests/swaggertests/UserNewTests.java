@@ -11,38 +11,19 @@ import org.junit.jupiter.api.Test;
 import services.UserService;
 
 import java.util.List;
-import java.util.Random;
-
 import static assertions.Conditions.hasMessage;
 import static assertions.Conditions.hasStatusCode;
+import static utils.RandomTestData.*;
 
 public class UserNewTests {
-    public static Random random;
     private static UserService userService;
 
     @BeforeAll
     public static void setUp() {
         RestAssured.baseURI = "http://85.192.34.140:8080";
         RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter(), new AllureRestAssured());
-        random = new Random();
         userService = new UserService();
     }
-
-    private FullUser getRandomUser() {
-        int randomNumber = Math.abs(random.nextInt(5000));
-        return FullUser.builder()
-                .login("ThredQaUser" + randomNumber)
-                .pass("123qwe")
-                .build();
-    }
-
-    private FullUser getAdminUser() {
-        return FullUser.builder()
-                .login("admin")
-                .pass("admin")
-                .build();
-    }
-
 
     @Test
     public void positiveRegisterTest() {
@@ -51,6 +32,15 @@ public class UserNewTests {
                 .should(hasStatusCode(201))
                 .should(hasMessage("User created"));
     }
+
+    @Test
+    public void positiveRegisterWithGamesTest() {
+        FullUser user = getRandomUserWithGame();
+        userService.register(user)
+                .should(hasStatusCode(201))
+                .should(hasMessage("User created"));
+    }
+
 
 
     @Test
