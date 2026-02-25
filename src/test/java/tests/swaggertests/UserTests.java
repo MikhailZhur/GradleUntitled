@@ -9,6 +9,7 @@ import io.restassured.common.mapper.TypeRef;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
+import listener.AdminUser;
 import models.swagger.FullUser;
 import models.swagger.Info;
 import models.swagger.JwtAuthData;
